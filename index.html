@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>CCTV Lalu Lintas Palembang</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">MONITORING LALU LINTAS</p>
+        <h1>CCTV Palembang</h1>
+      </div>
+      <div class="header-badge">LIVE</div>
+    </header>
+
+    <main>
+      <section class="hero-card">
+        <div class="hero-copy">
+          <span class="dot"></span>
+          <span id="globalStatus">Memuat kamera...</span>
+        </div>
+        <p>Pantau kondisi lalu lintas kota dalam satu halaman yang ringan dan nyaman di perangkat mobile.</p>
+      </section>
+
+      <section class="toolbar">
+        <input id="searchInput" type="search" placeholder="Cari CCTV atau lokasi..." autocomplete="off" />
+        <button id="reloadAllBtn" class="icon-button" title="Muat ulang semua">↻</button>
+      </section>
+
+      <section class="section-heading">
+        <div>
+          <p class="eyebrow">KAMERA</p>
+          <h2>Daftar CCTV</h2>
+        </div>
+        <span id="cameraCount" class="count-pill">1 kamera</span>
+      </section>
+
+      <section id="cameraGrid" class="camera-grid" aria-live="polite"></section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigasi utama">
+      <button class="nav-item active">▣<span>CCTV</span></button>
+      <button class="nav-item" disabled>⌖<span>Peta</span></button>
+      <button class="nav-item" disabled>★<span>Favorit</span></button>
+    </nav>
+  </div>
+
+  <template id="cameraCardTemplate">
+    <article class="camera-card">
+      <div class="video-wrap">
+        <video playsinline muted controls preload="metadata"></video>
+        <div class="video-overlay">
+          <span class="status-badge waiting">MENUNGGU</span>
+        </div>
+      </div>
+      <div class="camera-body">
+        <div class="camera-title-row">
+          <div>
+            <h3 class="camera-name"></h3>
+            <p class="camera-location"></p>
+          </div>
+          <button class="favorite-btn" title="Favorit" aria-label="Tambah ke favorit">☆</button>
+        </div>
+        <div class="actions">
+          <button class="action-btn play-btn">▶ Putar</button>
+          <button class="action-btn reload-btn">↻ Muat ulang</button>
+          <button class="action-btn fullscreen-btn">⛶ Layar penuh</button>
+        </div>
+        <p class="error-text" hidden></p>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
