@@ -187,3 +187,69 @@ reloadAllBtn.addEventListener("click", () => renderCameras(cameras));
 window.addEventListener("beforeunload", () => players.forEach((_, id) => destroyPlayer(id)));
 
 renderCameras();
+
+// ...existing code...
+
+errorText.hidden = true;
+
+const markOnline = () => {
+  badge.textContent = "LIVE";
+  badge.className = "status-badge online";
+  setGlobalStatus("Streaming CCTV tersedia", "online");
+};
+
+const markOffline = (message) => {
+  badge.textContent = "OFFLINE";
+  badge.className = "status-badge offline";
+  errorText.textContent = message;
+  errorText.hidden = false;
+  setGlobalStatus("Sebagian stream tidak dapat dimuat", "offline");
+};
+
+video.addEventListener("playing", markOnline, { once: true });
+video.addEventListener(
+  "error",
+  () => markOffline("Video gagal diputar. Periksa koneksi, status stream, atau konfigurasi CORS server."),
+  { once: true }
+);
+
+if (video.canPlayType("application/vnd.apple.mpegurl")) {
+  video.src = camera.stream;
+  players.set(camera.id, { video, hls: null });
+  video.play().catch(() => {});
+  return;
+}
+
+// Tambahkan kode fitur "Favorite" di bawah ini
+document.addEventListener('DOMContentLoaded', () => {
+  const favoriteButtons = document.querySelectorAll('.favorite-btn');
+
+  favoriteButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const isFavorited = button.classList.toggle('favorited'); // Toggle class
+      button.textContent = isFavorited ? '★' : '☆'; // Change icon
+
+      // Optional: Save favorite status (e.g., using localStorage)
+      const cameraLocation = button.closest('.camera-location')?.textContent || 'Unknown';
+      if (isFavorited) {
+        saveToFavorites(cameraLocation);
+      } else {
+        removeFromFavorites(cameraLocation);
+      }
+    });
+  });
+});
+
+function saveToFavorites(location) {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  if (!favorites.includes(location)) {
+    favorites.push(location);
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }
+}
+
+function removeFromFavorites(location) {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  const updatedFavorites = favorites.filter(fav => fav !== location);
+  localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+}
