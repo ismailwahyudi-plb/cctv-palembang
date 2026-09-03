@@ -130,7 +130,7 @@ video { width:100%; height:100%; display:block; object-fit:cover; background:#02
 
 @media (min-width: 700px) {
   .app-shell { padding-inline:24px; }
-  .camera-grid { grid-template-columns:repeat(2, minmax(0,1fr)); }
+  .camera-grid { grid-template-columns:repeat(3, minmax(0,1fr)); }
   .fullscreen-btn { grid-column:auto; }
   .actions { grid-template-columns:repeat(3,1fr); }
 }
