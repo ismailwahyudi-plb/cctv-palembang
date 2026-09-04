@@ -1,5 +1,6 @@
 const cameras = Array.from({ length: 60 }, (_, index) => {
   const id = index + 1;
+
   return {
     id,
     name: `Camera ${String(id).padStart(2, "0")}`,
@@ -17,58 +18,135 @@ const globalDot = document.querySelector(".dot");
 const template = document.getElementById("cameraCardTemplate");
 
 const players = new Map();
-const favorites = new Set(JSON.parse(localStorage.getItem("cctvFavorites") || "[]"));
+
+const favorites = new Set(
+  JSON.parse(localStorage.getItem("cctvFavorites") || "[]")
+);
+
+// =========================
+// GLOBAL STATUS
+// =========================
 
 function setGlobalStatus(text, status = "waiting") {
   globalStatus.textContent = text;
-  globalDot.className = `dot ${status}`;
+
+  if (globalDot) {
+    globalDot.className = `dot ${status}`;
+  }
 }
 
+// =========================
+// FAVORITES
+// =========================
+
 function saveFavorites() {
-  localStorage.setItem("cctvFavorites", JSON.stringify([...favorites]));
+  localStorage.setItem(
+    "cctvFavorites",
+    JSON.stringify([...favorites])
+  );
 }
+
+// =========================
+// PLAYER MANAGEMENT
+// =========================
 
 function destroyPlayer(id) {
   const current = players.get(id);
-  if (current?.hls) current.hls.destroy();
+
+  if (!current) return;
+
+  try {
+    if (current.hls) {
+      current.hls.destroy();
+    }
+
+    if (current.video) {
+      current.video.pause();
+      current.video.removeAttribute("src");
+      current.video.load();
+    }
+  } catch (_) {}
+
   players.delete(id);
 }
 
+// =========================
+// STREAM
+// =========================
+
 function attachStream(camera, video, badge, errorText) {
   destroyPlayer(camera.id);
+
   badge.textContent = "MENGHUBUNGKAN";
   badge.className = "status-badge waiting";
+
   errorText.hidden = true;
+  errorText.textContent = "";
 
   const markOnline = () => {
     badge.textContent = "LIVE";
     badge.className = "status-badge online";
-    setGlobalStatus("Streaming CCTV tersedia", "online");
+
+    setGlobalStatus(
+      "Streaming CCTV tersedia",
+      "online"
+    );
   };
 
   const markOffline = (message) => {
     badge.textContent = "OFFLINE";
     badge.className = "status-badge offline";
+
     errorText.textContent = message;
     errorText.hidden = false;
-    setGlobalStatus("Sebagian stream tidak dapat dimuat", "offline");
+
+    setGlobalStatus(
+      "Sebagian stream tidak dapat dimuat",
+      "offline"
+    );
   };
 
-  video.addEventListener("playing", markOnline, { once: true });
   video.addEventListener(
-    "error",
-    () => markOffline("Video gagal diputar. Periksa koneksi, status stream, atau konfigurasi CORS server."),
+    "playing",
+    markOnline,
     { once: true }
   );
 
-  if (video.canPlayType("application/vnd.apple.mpegurl")) {
+  video.addEventListener(
+    "error",
+    () => {
+      markOffline(
+        "Video gagal diputar. Periksa koneksi, status stream, atau konfigurasi CORS server."
+      );
+    },
+    { once: true }
+  );
+
+  // Native HLS
+  // Safari / iPhone / iPad
+  if (
+    video.canPlayType(
+      "application/vnd.apple.mpegurl"
+    )
+  ) {
     video.src = camera.stream;
-    players.set(camera.id, { video, hls: null });
+
+    players.set(camera.id, {
+      video,
+      hls: null,
+    });
+
     video.play().catch(() => {});
+
     return;
   }
 
-  if (window.Hls && Hls.isSupported()) {
+  // HLS.js
+  // Chrome / Edge / Android
+  if (
+    window.Hls &&
+    Hls.isSupported()
+  ) {
     const hls = new Hls({
       liveSyncDurationCount: 3,
       maxLiveSyncPlaybackRate: 1.2,
@@ -78,178 +156,371 @@ function attachStream(camera, video, badge, errorText) {
     hls.loadSource(camera.stream);
     hls.attachMedia(video);
 
-    hls.on(Hls.Events.MANIFEST_PARSED, () => {
-      video.play().catch(() => {});
-    });
-
-    hls.on(Hls.Events.ERROR, (_, data) => {
-      if (!data.fatal) return;
-
-      if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-        markOffline("Gagal mengambil HLS stream. Jika URL bisa dibuka langsung tetapi gagal di web ini, kemungkinan server belum mengizinkan CORS.");
-        hls.startLoad();
-      } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
-        hls.recoverMediaError();
-      } else {
-        markOffline("Player mengalami error fatal saat memutar stream.");
-        hls.destroy();
+    hls.on(
+      Hls.Events.MANIFEST_PARSED,
+      () => {
+        video.play().catch(() => {});
       }
+    );
+
+    hls.on(
+      Hls.Events.ERROR,
+      (_, data) => {
+        if (!data.fatal) return;
+
+        if (
+          data.type ===
+          Hls.ErrorTypes.NETWORK_ERROR
+        ) {
+          markOffline(
+            "Gagal mengambil stream HLS. Jika URL stream bisa dibuka langsung tetapi gagal di website ini, kemungkinan server belum mengizinkan CORS."
+          );
+
+          try {
+            hls.startLoad();
+          } catch (_) {}
+
+          return;
+        }
+
+        if (
+          data.type ===
+          Hls.ErrorTypes.MEDIA_ERROR
+        ) {
+          try {
+            hls.recoverMediaError();
+          } catch (_) {}
+
+          return;
+        }
+
+        markOffline(
+          "Player mengalami error fatal saat memutar stream."
+        );
+
+        try {
+          hls.destroy();
+        } catch (_) {}
+
+        players.delete(camera.id);
+      }
+    );
+
+    players.set(camera.id, {
+      video,
+      hls,
     });
 
-    players.set(camera.id, { video, hls });
-  } else {
-    markOffline("Browser ini tidak mendukung pemutaran HLS.");
+    return;
   }
+
+  markOffline(
+    "Browser ini tidak mendukung pemutaran HLS."
+  );
 }
 
+// =========================
+// CAMERA CARD
+// =========================
+
 function createCameraCard(camera) {
-  const fragment = template.content.cloneNode(true);
-  const card = fragment.querySelector(".camera-card");
-  const video = fragment.querySelector("video");
-  const badge = fragment.querySelector(".status-badge");
-  const errorText = fragment.querySelector(".error-text");
-  const favoriteBtn = fragment.querySelector(".favorite-btn");
+  const fragment =
+    template.content.cloneNode(true);
 
-  card.dataset.cameraId = camera.id;
-  fragment.querySelector(".camera-name").textContent = camera.name;
-  fragment.querySelector(".camera-location").textContent = camera.location;
+  const card =
+    fragment.querySelector(
+      ".camera-card"
+    );
 
-  if (favorites.has(camera.id)) {
-    favoriteBtn.classList.add("active");
+  const video =
+    fragment.querySelector("video");
+
+  const badge =
+    fragment.querySelector(
+      ".status-badge"
+    );
+
+  const errorText =
+    fragment.querySelector(
+      ".error-text"
+    );
+
+  const favoriteBtn =
+    fragment.querySelector(
+      ".favorite-btn"
+    );
+
+  const playBtn =
+    fragment.querySelector(
+      ".play-btn"
+    );
+
+  const reloadBtn =
+    fragment.querySelector(
+      ".reload-btn"
+    );
+
+  const fullscreenBtn =
+    fragment.querySelector(
+      ".fullscreen-btn"
+    );
+
+  const cameraName =
+    fragment.querySelector(
+      ".camera-name"
+    );
+
+  const cameraLocation =
+    fragment.querySelector(
+      ".camera-location"
+    );
+
+  card.dataset.cameraId =
+    camera.id;
+
+  cameraName.textContent =
+    camera.name;
+
+  cameraLocation.textContent =
+    camera.location;
+
+  badge.textContent = "SIAP";
+  badge.className =
+    "status-badge waiting";
+
+  // =========================
+  // FAVORITE STATUS
+  // =========================
+
+  if (
+    favorites.has(camera.id)
+  ) {
+    favoriteBtn.classList.add(
+      "active"
+    );
+
     favoriteBtn.textContent = "★";
+  } else {
+    favoriteBtn.textContent = "☆";
   }
 
-  fragment.querySelector(".play-btn").addEventListener("click", async () => {
-    if (!players.has(camera.id)) attachStream(camera, video, badge, errorText);
-    try {
-      await video.play();
-    } catch (_) {}
-  });
+  // =========================
+  // PLAY
+  // =========================
 
-  fragment.querySelector(".reload-btn").addEventListener("click", () => {
-    video.pause();
-    video.removeAttribute("src");
-    video.load();
-    attachStream(camera, video, badge, errorText);
-  });
+  playBtn.addEventListener(
+    "click",
+    async () => {
+      if (
+        !players.has(camera.id)
+      ) {
+        attachStream(
+          camera,
+          video,
+          badge,
+          errorText
+        );
+      }
 
-  fragment.querySelector(".fullscreen-btn").addEventListener("click", async () => {
-    try {
-      if (video.requestFullscreen) await video.requestFullscreen();
-      else if (video.webkitEnterFullscreen) video.webkitEnterFullscreen();
-    } catch (_) {}
-  });
-
-  favoriteBtn.addEventListener("click", () => {
-    if (favorites.has(camera.id)) {
-      favorites.delete(camera.id);
-      favoriteBtn.classList.remove("active");
-      favoriteBtn.textContent = "☆";
-    } else {
-      favorites.add(camera.id);
-      favoriteBtn.classList.add("active");
-      favoriteBtn.textContent = "★";
+      try {
+        await video.play();
+      } catch (_) {}
     }
-    saveFavorites();
-  });
+  );
 
-  // Penting: 60 stream TIDAK diputar otomatis agar HP/browser tidak terbebani.
-  // Stream baru dimuat ketika tombol Putar ditekan.
-  badge.textContent = "SIAP";
-  badge.className = "status-badge waiting";
+  // =========================
+  // RELOAD
+  // =========================
+
+  reloadBtn.addEventListener(
+    "click",
+    () => {
+      destroyPlayer(camera.id);
+
+      badge.textContent =
+        "MENGHUBUNGKAN";
+
+      badge.className =
+        "status-badge waiting";
+
+      errorText.hidden = true;
+
+      attachStream(
+        camera,
+        video,
+        badge,
+        errorText
+      );
+    }
+  );
+
+  // =========================
+  // FULLSCREEN
+  // =========================
+
+  fullscreenBtn.addEventListener(
+    "click",
+    async () => {
+      try {
+        if (
+          video.requestFullscreen
+        ) {
+          await video.requestFullscreen();
+        } else if (
+          video.webkitEnterFullscreen
+        ) {
+          video.webkitEnterFullscreen();
+        }
+      } catch (_) {}
+    }
+  );
+
+  // =========================
+  // FAVORITE
+  // =========================
+
+  favoriteBtn.addEventListener(
+    "click",
+    () => {
+      if (
+        favorites.has(camera.id)
+      ) {
+        favorites.delete(camera.id);
+
+        favoriteBtn.classList.remove(
+          "active"
+        );
+
+        favoriteBtn.textContent = "☆";
+      } else {
+        favorites.add(camera.id);
+
+        favoriteBtn.classList.add(
+          "active"
+        );
+
+        favoriteBtn.textContent = "★";
+      }
+
+      saveFavorites();
+    }
+  );
 
   return fragment;
 }
 
-function renderCameras(list = cameras) {
-  players.forEach((_, id) => destroyPlayer(id));
+// =========================
+// RENDER CAMERA
+// =========================
+
+function renderCameras(
+  list = cameras
+) {
+  players.forEach((_, id) => {
+    destroyPlayer(id);
+  });
+
   cameraGrid.innerHTML = "";
-  cameraCount.textContent = `${list.length} kamera`;
+
+  cameraCount.textContent =
+    `${list.length} kamera`;
 
   if (!list.length) {
-    cameraGrid.innerHTML = '<div class="empty-state">CCTV tidak ditemukan.</div>';
+    cameraGrid.innerHTML = `
+      <div class="empty-state">
+        CCTV tidak ditemukan.
+      </div>
+    `;
+
+    setGlobalStatus(
+      "CCTV tidak ditemukan",
+      "offline"
+    );
+
     return;
   }
 
-  list.forEach((camera) => cameraGrid.appendChild(createCameraCard(camera)));
-  setGlobalStatus(`${list.length} kamera siap dipilih`, "waiting");
+  list.forEach((camera) => {
+    cameraGrid.appendChild(
+      createCameraCard(camera)
+    );
+  });
+
+  setGlobalStatus(
+    `${list.length} kamera siap dipilih`,
+    "waiting"
+  );
 }
 
-searchInput.addEventListener("input", (event) => {
-  const query = event.target.value.trim().toLowerCase();
-  const filtered = cameras.filter((camera) =>
-    `${camera.name} ${camera.location} cam${camera.id}`.toLowerCase().includes(query)
-  );
-  renderCameras(filtered);
-});
+// =========================
+// SEARCH
+// =========================
 
-reloadAllBtn.addEventListener("click", () => renderCameras(cameras));
-window.addEventListener("beforeunload", () => players.forEach((_, id) => destroyPlayer(id)));
+searchInput.addEventListener(
+  "input",
+  (event) => {
+    const query =
+      event.target.value
+        .trim()
+        .toLowerCase();
+
+    if (!query) {
+      renderCameras(cameras);
+      return;
+    }
+
+    const filtered =
+      cameras.filter(
+        (camera) => {
+          const searchable = `
+            ${camera.name}
+            ${camera.location}
+            cam${camera.id}
+          `
+            .toLowerCase();
+
+          return searchable.includes(
+            query
+          );
+        }
+      );
+
+    renderCameras(filtered);
+  }
+);
+
+// =========================
+// REFRESH LIST
+// =========================
+
+reloadAllBtn.addEventListener(
+  "click",
+  () => {
+    searchInput.value = "";
+
+    renderCameras(cameras);
+  }
+);
+
+// =========================
+// CLEANUP
+// =========================
+
+window.addEventListener(
+  "beforeunload",
+  () => {
+    players.forEach(
+      (_, id) => {
+        destroyPlayer(id);
+      }
+    );
+  }
+);
+
+// =========================
+// INITIAL LOAD
+// =========================
 
 renderCameras();
 
-// ...existing code...
 
-errorText.hidden = true;
-
-const markOnline = () => {
-  badge.textContent = "LIVE";
-  badge.className = "status-badge online";
-  setGlobalStatus("Streaming CCTV tersedia", "online");
-};
-
-const markOffline = (message) => {
-  badge.textContent = "OFFLINE";
-  badge.className = "status-badge offline";
-  errorText.textContent = message;
-  errorText.hidden = false;
-  setGlobalStatus("Sebagian stream tidak dapat dimuat", "offline");
-};
-
-video.addEventListener("playing", markOnline, { once: true });
-video.addEventListener(
-  "error",
-  () => markOffline("Video gagal diputar. Periksa koneksi, status stream, atau konfigurasi CORS server."),
-  { once: true }
-);
-
-if (video.canPlayType("application/vnd.apple.mpegurl")) {
-  video.src = camera.stream;
-  players.set(camera.id, { video, hls: null });
-  video.play().catch(() => {});
-  return;
-}
-
-// Tambahkan kode fitur "Favorite" di bawah ini
-document.addEventListener('DOMContentLoaded', () => {
-  const favoriteButtons = document.querySelectorAll('.favorite-btn');
-
-  favoriteButtons.forEach(button => {
-    button.addEventListener('click', () => {
-      const isFavorited = button.classList.toggle('favorited'); // Toggle class
-      button.textContent = isFavorited ? '★' : '☆'; // Change icon
-
-      // Optional: Save favorite status (e.g., using localStorage)
-      const cameraLocation = button.closest('.camera-location')?.textContent || 'Unknown';
-      if (isFavorited) {
-        saveToFavorites(cameraLocation);
-      } else {
-        removeFromFavorites(cameraLocation);
-      }
-    });
-  });
-});
-
-function saveToFavorites(location) {
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-  if (!favorites.includes(location)) {
-    favorites.push(location);
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }
-}
-
-function removeFromFavorites(location) {
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-  const updatedFavorites = favorites.filter(fav => fav !== location);
-  localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
-}
