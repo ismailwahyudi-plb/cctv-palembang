@@ -16,12 +16,19 @@ const reloadAllBtn = document.getElementById("reloadAllBtn");
 const globalStatus = document.getElementById("globalStatus");
 const globalDot = document.querySelector(".dot");
 const template = document.getElementById("cameraCardTemplate");
+const cameraSectionTitle = document.getElementById(
+  "cameraSectionTitle"
+);
+const navCctv = document.getElementById("navCctv");
+const navFavorites = document.getElementById("navFavorites");
 
 const players = new Map();
 
 const favorites = new Set(
   JSON.parse(localStorage.getItem("cctvFavorites") || "[]")
 );
+
+let activeFilter = "all";
 
 // =========================
 // GLOBAL STATUS
@@ -44,6 +51,63 @@ function saveFavorites() {
     "cctvFavorites",
     JSON.stringify([...favorites])
   );
+}
+
+// =========================
+// TAMPILAN (SEMUA / FAVORIT)
+// =========================
+
+function visibleCameras() {
+  const query = searchInput.value
+    .trim()
+    .toLowerCase();
+
+  const base =
+    activeFilter === "favorites"
+      ? cameras.filter(
+          (camera) => favorites.has(camera.id)
+        )
+      : cameras;
+
+  if (!query) return base;
+
+  return base.filter((camera) => {
+    const searchable = `
+      ${camera.name}
+      ${camera.location}
+      cam${camera.id}
+    `
+      .toLowerCase();
+
+    return searchable.includes(query);
+  });
+}
+
+function setActiveView(view) {
+  activeFilter = view;
+
+  if (navCctv) {
+    navCctv.classList.toggle(
+      "active",
+      view === "all"
+    );
+  }
+
+  if (navFavorites) {
+    navFavorites.classList.toggle(
+      "active",
+      view === "favorites"
+    );
+  }
+
+  if (cameraSectionTitle) {
+    cameraSectionTitle.textContent =
+      view === "favorites"
+        ? "Daftar Favorit"
+        : "Daftar CCTV";
+  }
+
+  renderCameras(visibleCameras());
 }
 
 // =========================
@@ -403,6 +467,10 @@ function createCameraCard(camera) {
       }
 
       saveFavorites();
+
+      if (activeFilter === "favorites") {
+        renderCameras(visibleCameras());
+      }
     }
   );
 
@@ -414,7 +482,7 @@ function createCameraCard(camera) {
 // =========================
 
 function renderCameras(
-  list = cameras
+  list = visibleCameras()
 ) {
   players.forEach((_, id) => {
     destroyPlayer(id);
@@ -423,17 +491,24 @@ function renderCameras(
   cameraGrid.innerHTML = "";
 
   cameraCount.textContent =
-    `${list.length} kamera`;
+    activeFilter === "favorites"
+      ? `${list.length} favorit`
+      : `${list.length} kamera`;
 
   if (!list.length) {
+    const emptyMessage =
+      activeFilter === "favorites"
+        ? "Belum ada kamera favorit. Tekan tombol ☆ pada kamera untuk menambahkannya."
+        : "CCTV tidak ditemukan.";
+
     cameraGrid.innerHTML = `
       <div class="empty-state">
-        CCTV tidak ditemukan.
+        ${emptyMessage}
       </div>
     `;
 
     setGlobalStatus(
-      "CCTV tidak ditemukan",
+      "Tidak ada kamera untuk ditampilkan",
       "offline"
     );
 
@@ -458,34 +533,8 @@ function renderCameras(
 
 searchInput.addEventListener(
   "input",
-  (event) => {
-    const query =
-      event.target.value
-        .trim()
-        .toLowerCase();
-
-    if (!query) {
-      renderCameras(cameras);
-      return;
-    }
-
-    const filtered =
-      cameras.filter(
-        (camera) => {
-          const searchable = `
-            ${camera.name}
-            ${camera.location}
-            cam${camera.id}
-          `
-            .toLowerCase();
-
-          return searchable.includes(
-            query
-          );
-        }
-      );
-
-    renderCameras(filtered);
+  () => {
+    renderCameras(visibleCameras());
   }
 );
 
@@ -498,7 +547,25 @@ reloadAllBtn.addEventListener(
   () => {
     searchInput.value = "";
 
-    renderCameras(cameras);
+    renderCameras(visibleCameras());
+  }
+);
+
+// =========================
+// NAVIGASI BAWAH
+// =========================
+
+navCctv.addEventListener(
+  "click",
+  () => {
+    setActiveView("all");
+  }
+);
+
+navFavorites.addEventListener(
+  "click",
+  () => {
+    setActiveView("favorites");
   }
 );
 
