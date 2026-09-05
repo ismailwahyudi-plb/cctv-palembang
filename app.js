@@ -23,7 +23,9 @@ const navCctv = document.getElementById("navCctv");
 const navFavorites = document.getElementById("navFavorites");
 const pager = document.getElementById("pager");
 const pagerInfo = document.getElementById("pagerInfo");
+const pagerInfoShort = document.getElementById("pagerInfoShort");
 const pageNumbers = document.getElementById("pageNumbers");
+const pagerIndicator = document.getElementById("pagerIndicator");
 const prevPageBtn = document.getElementById("prevPageBtn");
 const nextPageBtn = document.getElementById("nextPageBtn");
 const pageSizeSelect = document.getElementById("pageSizeSelect");
@@ -535,11 +537,6 @@ function renderCameras(
 // =========================
 
 function renderPager(total, totalPages) {
-  const noun =
-    activeFilter === "favorites"
-      ? "favorit"
-      : "kamera";
-
   const firstShown =
     (currentPage - 1) * pageSize + 1;
 
@@ -548,9 +545,18 @@ function renderPager(total, totalPages) {
     total
   );
 
+  const rangeText =
+    `${firstShown}–${lastShown} dari ${total}`;
+
   pager.classList.add("visible");
 
-  pagerInfo.textContent = `Menampilkan ${firstShown}-${lastShown} dari ${total} ${noun}`;
+  pagerInfo.textContent =
+    `Menampilkan ${rangeText}`;
+
+  pagerInfoShort.textContent = rangeText;
+
+  pagerIndicator.textContent =
+    `${currentPage} / ${totalPages}`;
 
   prevPageBtn.disabled =
     currentPage === 1;
@@ -569,7 +575,7 @@ function renderPager(total, totalPages) {
     if (entry === "...") {
       const dots = document.createElement("span");
       dots.className = "page-dots";
-      dots.textContent = "...";
+      dots.textContent = "…";
       pageNumbers.appendChild(dots);
       return;
     }

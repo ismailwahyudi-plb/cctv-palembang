@@ -90,7 +90,14 @@ h2 { margin-bottom: 0; font-size: 19px; line-height: 1.2; }
   color: var(--text);
   font-size: 18px;
 }
-.section-heading { display: flex; justify-content: space-between; align-items: end; gap: 10px; margin-bottom: 8px; }
+.section-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 10px;
+  margin-bottom: 8px;
+}
 .count-pill { color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 9px; font-size: 11px; }
 
 /* ===== Kartu CCTV compact monitoring ===== */
@@ -178,80 +185,128 @@ video { width: 100%; height: 100%; display: block; object-fit: cover; background
 .favorite-btn.active { color: #facc15; }
 .empty-state { text-align: center; color: var(--muted); padding: 30px 10px; border: 1px dashed var(--line); border-radius: 14px; font-size: 14px; }
 
-/* Pagination */
+/* ===== Heading controls: page-size select ===== */
+.heading-controls { display: flex; align-items: center; gap: 8px; }
+.page-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.select-wrap { position: relative; display: inline-flex; }
+.select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 6px 28px 6px 11px;
+  min-height: 34px;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.select-wrap select:hover { border-color: rgba(96,165,250,.4); }
+.select-wrap select:focus-visible {
+  outline: none;
+  border-color: rgba(96,165,250,.6);
+  box-shadow: 0 0 0 3px rgba(96,165,250,.15);
+}
+.select-wrap::after {
+  content: "";
+  position: absolute;
+  right: 11px; top: 50%;
+  width: 7px; height: 7px;
+  border-right: 1.6px solid var(--muted);
+  border-bottom: 1.6px solid var(--muted);
+  transform: translateY(-72%) rotate(45deg);
+  pointer-events: none;
+}
+.select-wrap select option { background: var(--panel); color: var(--text); }
+
+/* ===== Pagination toolbar ===== */
 .pager {
   display: none;
   flex-direction: column;
-  gap: 8px;
-  margin: 16px 0 2px;
+  gap: 10px;
+  margin: 14px 0 2px;
+  padding: 10px 12px;
+  background: rgba(15,27,45,.85);
+  border: 1px solid var(--line);
+  border-radius: 12px;
 }
 .pager.visible { display: flex; }
-.pager-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-.pager-info { margin: 0; color: var(--muted); font-size: 12px; }
-.pager-size {
+.pager-label { margin: 0; text-align: center; color: var(--muted); font-size: 12.5px; font-weight: 600; }
+#pagerInfo { display: none; }
+#pagerInfoShort { display: inline; }
+.pager-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.pager-controls .page-btn { flex: 1 1 auto; min-width: 0; }
+.page-numbers { display: none; }
+.pager-indicator { color: var(--text); font-size: 13px; font-weight: 800; white-space: nowrap; flex: 0 0 auto; padding: 0 4px; }
+.page-dots { color: var(--muted); padding: 0 2px; font-size: 13px; }
+.page-btn {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  color: var(--muted);
-  font-size: 12px;
-}
-.pager-size select {
-  background: var(--panel);
+  padding: 0 12px;
   border: 1px solid var(--line);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 5px 8px;
-  font-size: 12px;
-  cursor: pointer;
-}
-.pager-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-.page-numbers {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  max-width: 100%;
-  overflow-x: auto;
-  padding: 2px;
-}
-.page-numbers::-webkit-scrollbar { display: none; }
-.page-btn, .page-arrow {
-  min-width: 34px;
-  height: 34px;
-  padding: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--panel);
   color: var(--muted);
-  font-size: 13px;
+  font-family: inherit;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease;
 }
-.page-btn:hover,
-.page-arrow:hover:not(:disabled) {
-  background: var(--panel-soft);
-  color: var(--text);
-}
+.page-btn:hover:not(:disabled) { background: var(--panel-soft); color: var(--text); border-color: rgba(96,165,250,.45); }
+.page-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(96,165,250,.3); }
+.page-btn:disabled { opacity: .38; cursor: not-allowed; }
 .page-btn.current {
-  background: rgba(59,130,246,.18);
-  border-color: rgba(59,130,246,.45);
-  color: #bfdbfe;
+  background: rgba(59,130,246,.2);
+  border-color: rgba(96,165,250,.55);
+  color: #dbeafe;
+  cursor: default;
 }
-.page-arrow:disabled { opacity: .4; cursor: not-allowed; }
-.page-dots { color: var(--muted); padding: 0 2px; }
+
+@media (min-width: 700px) {
+  .pager {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 10px;
+  }
+  .pager-label { text-align: left; }
+  #pagerInfo { display: inline; }
+  #pagerInfoShort { display: none; }
+  .pager-controls { justify-content: flex-end; gap: 6px; }
+  .pager-controls .page-btn { flex: 0 0 auto; }
+  .page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 2px;
+  }
+  .page-numbers::-webkit-scrollbar { display: none; }
+  .pager-indicator { display: none; }
+  .page-btn { min-width: 34px; min-height: 34px; height: 34px; padding: 0 9px; border-radius: 9px; font-size: 13px; }
+  .page-btn-text { display: none; }
+  .page-prev, .page-next { width: 34px; padding: 0; }
+}
 
 /* Bottom nav */
 .bottom-nav {

@@ -37,30 +37,35 @@
           <p class="eyebrow">KAMERA</p>
           <h2 id="cameraSectionTitle">Daftar CCTV</h2>
         </div>
-        <span id="cameraCount" class="count-pill">150 kamera</span>
+        <div class="heading-controls">
+          <span id="cameraCount" class="count-pill">150 kamera</span>
+          <label class="page-size" for="pageSizeSelect">
+            <span class="page-size-text">Tampilkan</span>
+            <span class="select-wrap">
+              <select id="pageSizeSelect" aria-label="Jumlah kamera per halaman">
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+                <option value="48">48</option>
+              </select>
+            </span>
+          </label>
+        </div>
       </section>
 
       <section id="cameraGrid" class="camera-grid" aria-live="polite"></section>
 
-      <div class="pager" id="pager" aria-live="polite">
-        <div class="pager-top">
-          <p class="pager-info" id="pagerInfo"></p>
-          <label class="pager-size">
-            <span>Tampil per hal.</span>
-            <select id="pageSizeSelect" aria-label="Jumlah kamera per halaman">
-              <option value="12" selected>12</option>
-              <option value="24">24</option>
-              <option value="36">36</option>
-              <option value="60">60</option>
-            </select>
-          </label>
-        </div>
-        <nav class="pager-controls" aria-label="Navigasi halaman">
-          <button id="prevPageBtn" class="page-arrow" type="button" aria-label="Halaman sebelumnya">‹</button>
+      <nav class="pager" id="pager" aria-label="Navigasi halaman">
+        <p class="pager-label">
+          <span id="pagerInfo" aria-live="polite">Menampilkan 1–12 dari 150</span>
+          <span id="pagerInfoShort" aria-live="polite">1–12 dari 150</span>
+        </p>
+        <div class="pager-controls">
+          <button id="prevPageBtn" class="page-btn page-prev" type="button" aria-label="Halaman sebelumnya">‹<span class="page-btn-text"> Sebelumnya</span></button>
           <div class="page-numbers" id="pageNumbers"></div>
-          <button id="nextPageBtn" class="page-arrow" type="button" aria-label="Halaman berikutnya">›</button>
-        </nav>
-      </div>
+          <span class="pager-indicator" id="pagerIndicator" aria-live="polite">1 / 13</span>
+          <button id="nextPageBtn" class="page-btn page-next" type="button" aria-label="Halaman berikutnya"><span class="page-btn-text">Berikutnya </span>›</button>
+        </div>
+      </nav>
     </main>
 
     <nav class="bottom-nav" aria-label="Navigasi utama">
