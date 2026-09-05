@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -24,7 +24,7 @@
           <span class="dot"></span>
           <span id="globalStatus">Memuat kamera...</span>
         </div>
-        <p>Pantau kondisi lalu lintas kota dalam satu halaman yang ringan dan nyaman di perangkat mobile.</p>
+        <p>Pantau kondisi lalu lintas kota dalam satu halaman yang ringan dan nyaman.</p>
       </section>
 
       <section class="toolbar">
@@ -58,21 +58,19 @@
           <span class="status-badge waiting">MENUNGGU</span>
         </div>
       </div>
-      <div class="camera-body">
-        <div class="camera-title-row">
-          <div>
-            <h3 class="camera-name"></h3>
-            <p class="camera-location"></p>
-          </div>
-          <button class="favorite-btn" title="Favorit" aria-label="Tambah ke favorit">☆</button>
+      <div class="camera-bar">
+        <div class="camera-info">
+          <h3 class="camera-name"></h3>
+          <p class="camera-location"></p>
         </div>
-        <div class="actions">
-          <button class="action-btn play-btn">▶ Putar</button>
-          <button class="action-btn reload-btn">↻ Muat ulang</button>
-          <button class="action-btn fullscreen-btn">⛶ Layar penuh</button>
+        <div class="camera-actions">
+          <button class="action-btn play-btn" type="button" title="Putar" aria-label="Putar CCTV">▶</button>
+          <button class="action-btn reload-btn" type="button" title="Muat ulang" aria-label="Muat ulang stream">↻</button>
+          <button class="action-btn fullscreen-btn" type="button" title="Layar penuh" aria-label="Layar penuh">⛶</button>
+          <button class="favorite-btn" type="button" title="Favorit" aria-label="Tambah ke favorit">☆</button>
         </div>
-        <p class="error-text" hidden></p>
       </div>
+      <p class="error-text" hidden></p>
     </article>
   </template>
 
