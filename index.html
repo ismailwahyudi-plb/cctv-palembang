@@ -37,10 +37,30 @@
           <p class="eyebrow">KAMERA</p>
           <h2 id="cameraSectionTitle">Daftar CCTV</h2>
         </div>
-        <span id="cameraCount" class="count-pill">1 kamera</span>
+        <span id="cameraCount" class="count-pill">150 kamera</span>
       </section>
 
       <section id="cameraGrid" class="camera-grid" aria-live="polite"></section>
+
+      <div class="pager" id="pager" aria-live="polite">
+        <div class="pager-top">
+          <p class="pager-info" id="pagerInfo"></p>
+          <label class="pager-size">
+            <span>Tampil per hal.</span>
+            <select id="pageSizeSelect" aria-label="Jumlah kamera per halaman">
+              <option value="12" selected>12</option>
+              <option value="24">24</option>
+              <option value="36">36</option>
+              <option value="60">60</option>
+            </select>
+          </label>
+        </div>
+        <nav class="pager-controls" aria-label="Navigasi halaman">
+          <button id="prevPageBtn" class="page-arrow" type="button" aria-label="Halaman sebelumnya">‹</button>
+          <div class="page-numbers" id="pageNumbers"></div>
+          <button id="nextPageBtn" class="page-arrow" type="button" aria-label="Halaman berikutnya">›</button>
+        </nav>
+      </div>
     </main>
 
     <nav class="bottom-nav" aria-label="Navigasi utama">
