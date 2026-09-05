@@ -314,19 +314,9 @@ function createCameraCard(camera) {
       ".favorite-btn"
     );
 
-  const playBtn =
-    fragment.querySelector(
-      ".play-btn"
-    );
-
   const reloadBtn =
     fragment.querySelector(
       ".reload-btn"
-    );
-
-  const fullscreenBtn =
-    fragment.querySelector(
-      ".fullscreen-btn"
     );
 
   const cameraName =
@@ -334,19 +324,11 @@ function createCameraCard(camera) {
       ".camera-name"
     );
 
-  const cameraLocation =
-    fragment.querySelector(
-      ".camera-location"
-    );
-
   card.dataset.cameraId =
     camera.id;
 
   cameraName.textContent =
     camera.name;
-
-  cameraLocation.textContent =
-    camera.location;
 
   badge.textContent = "SIAP";
   badge.className =
@@ -369,26 +351,31 @@ function createCameraCard(camera) {
   }
 
   // =========================
-  // PLAY
+  // PLAY (klik video untuk mulai/jeda)
   // =========================
 
-  playBtn.addEventListener(
+  video.addEventListener(
     "click",
-    async () => {
+    () => {
       if (
-        !players.has(camera.id)
+        players.has(camera.id)
       ) {
-        attachStream(
-          camera,
-          video,
-          badge,
-          errorText
-        );
+        if (video.paused) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+        return;
       }
 
-      try {
-        await video.play();
-      } catch (_) {}
+      attachStream(
+        camera,
+        video,
+        badge,
+        errorText
+      );
+
+      video.play().catch(() => {});
     }
   );
 
@@ -415,27 +402,6 @@ function createCameraCard(camera) {
         badge,
         errorText
       );
-    }
-  );
-
-  // =========================
-  // FULLSCREEN
-  // =========================
-
-  fullscreenBtn.addEventListener(
-    "click",
-    async () => {
-      try {
-        if (
-          video.requestFullscreen
-        ) {
-          await video.requestFullscreen();
-        } else if (
-          video.webkitEnterFullscreen
-        ) {
-          video.webkitEnterFullscreen();
-        }
-      } catch (_) {}
     }
   );
 
