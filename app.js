@@ -1,9 +1,44 @@
+// Nama/title resmi CCTV dari data palembang.go.id (file cctv-Palembang.json).
+// Kamera yang tidak tercantum di data resmi tetap memakai nama default.
+const cctvTitles = {
+  2: "CCTV Benteng Kuto Besak",
+  3: "CCTV Simpang Polda",
+  4: "CCTV Simpang Macan Lindungan",
+  5: "CCTV Simpang Angkatan 45",
+  6: "CCTV Cinde",
+  8: "CCTV SP Charitas",
+  9: "CCTV Masjid Agung",
+  13: "CCTV KM 12",
+  14: "CCTV Punti Kayu",
+  20: "CCTV Plaza 7 Ulu",
+  21: "CCTV SP Samsat",
+  24: "CCTV Darma Agung",
+  25: "CCTV Lapangan Parkir Pasar 16",
+  26: "CCTV DEPAN DISDUKCAPIL",
+  28: "CCTV Kambang Iwak",
+  30: "CCTV SP IP",
+  36: "CCTV Pasar 16",
+  38: "CCTV Lampu Merah Kol Atmo",
+  39: "CCTV Bank Sumsel Atmo",
+  40: "CCTV JL VETERAN",
+  41: "CCTV JL VETERAN 1",
+  42: "CCTV SP BOM BARU",
+  43: "CCTV SP Parameswara",
+  44: "CCTV SP DPRD PROV",
+  45: "CCTV SP BANDARA",
+  46: "CCTV Kebun Sayur",
+  47: "CCTV TAMAN SISWA",
+  48: "CCTV SP Soekarno Hatta",
+  49: "CCTV Jl Tembesu",
+  50: "CCTV JL VETERAN 2",
+};
+
 const cameras = Array.from({ length: 150 }, (_, index) => {
   const id = index + 1;
 
   return {
     id,
-    name: `Camera ${String(id).padStart(2, "0")}`,
+    name: cctvTitles[id] || `Camera ${String(id).padStart(2, "0")}`,
     location: "Palembang, Sumatera Selatan",
     stream: `https://stream.palembang.go.id/cam${id}/main_stream.m3u8`,
   };

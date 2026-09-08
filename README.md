@@ -41,6 +41,6 @@ Jika stream dapat dibuka langsung tetapi player menampilkan error network/CORS, 
 
 
 ## Daftar kamera
-Prototype ini sudah membuat 60 kamera otomatis dari cam1 sampai cam60. Nama default adalah Camera 01 s/d Camera 60. Untuk mengganti nama, edit fungsi pembentuk data kamera di app.js atau ubah menjadi daftar objek manual jika ingin nama lokasi spesifik.
+Prototype membuat 150 entri otomatis dari cam1 sampai cam150. Nama/title untuk kamera yang terdaftar di data resmi (`cctv-Palembang.json` dari palembang.go.id) diambil dari objek `cctvTitles` di `app.js` (mis. cam42 = "CCTV SP BOM BARU"). Kamera yang tidak tercantum di data resmi tetap memakai nama default `Camera NN`.
 
-Catatan: demi performa mobile, 60 stream tidak dijalankan bersamaan. Stream baru dimuat saat tombol Putar pada kamera dipilih.
+Catatan: demi performa mobile, stream tidak dijalankan bersamaan. Stream baru dimuat saat kartu video diklik/diputar.
