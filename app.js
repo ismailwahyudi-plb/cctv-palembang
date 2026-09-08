@@ -66,12 +66,42 @@ const pagerIndicator = document.getElementById("pagerIndicator");
 const prevPageBtn = document.getElementById("prevPageBtn");
 const nextPageBtn = document.getElementById("nextPageBtn");
 const pageSizeSelect = document.getElementById("pageSizeSelect");
+const headerUser = document.getElementById("headerUser");
+const logoutBtn = document.getElementById("logoutBtn");
 
 const players = new Map();
 
-const favorites = new Set(
-  JSON.parse(localStorage.getItem("cctvFavorites") || "[]")
-);
+// =========================
+// FAVORITES STORE (per-akun)
+// Abstraksi penyimpanan favorit. Saat migrasi ke Supabase, cukup ganti
+// isi fungsi-fungsi ini dengan query tabel `favorites` (RLS auth.uid())
+// tanpa mengubah pemakaian di bawah (Set `favorites` + saveFavorites).
+// =========================
+const FavoritesStore = {
+  key() {
+    const user = AuthService.getCurrentUser();
+    return user
+      ? `${AppConfig.STORAGE_KEYS.favorites}:${user.id}`
+      : AppConfig.STORAGE_KEYS.favorites;
+  },
+  load() {
+    try {
+      return new Set(
+        JSON.parse(localStorage.getItem(this.key()) || "[]")
+      );
+    } catch (_) {
+      return new Set();
+    }
+  },
+  save(set) {
+    localStorage.setItem(
+      this.key(),
+      JSON.stringify([...set])
+    );
+  },
+};
+
+const favorites = FavoritesStore.load();
 
 let activeFilter = "all";
 let currentPage = 1;
@@ -94,11 +124,36 @@ function setGlobalStatus(text, status = "waiting") {
 // =========================
 
 function saveFavorites() {
-  localStorage.setItem(
-    "cctvFavorites",
-    JSON.stringify([...favorites])
-  );
+  FavoritesStore.save(favorites);
 }
+
+// =========================
+// SESI & AKUN
+// =========================
+
+function renderAccountInfo() {
+  const user = AuthService.getCurrentUser();
+
+  if (headerUser) {
+    headerUser.textContent = user ? `Masuk sebagai: ${user.email}` : "";
+  }
+}
+
+function handleLogout() {
+  // Hentikan semua stream sebelum keluar.
+  players.forEach((_, id) => {
+    destroyPlayer(id);
+  });
+
+  AuthService.signOut();
+  location.href = AppConfig.PAGES.login;
+}
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", handleLogout);
+}
+
+renderAccountInfo();
 
 // =========================
 // TAMPILAN (SEMUA / FAVORIT)

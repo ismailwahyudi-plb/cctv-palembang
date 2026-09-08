@@ -334,3 +334,44 @@ video { width: 100%; height: 100%; display: block; object-fit: cover; background
 @media (min-width: 1024px) {
   .camera-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
+
+/* ===== Header akun (email + tombol keluar) ===== */
+.header-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.header-title h1 { margin-bottom: 0; }
+.header-user {
+  margin: 4px 0 0;
+  max-width: min(52vw, 300px);
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.logout-btn {
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+  color: #fecaca;
+  border-radius: 999px;
+  padding: 5px 11px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.logout-btn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.55);
+}

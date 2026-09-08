@@ -1,99 +1,66 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a" />
-  <title>CCTV Lalu Lintas Palembang</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+  <title>Masuk — CCTV Lalu Lintas Palembang</title>
+  <link rel="stylesheet" href="auth.css" />
 </head>
-<body>
-  <div class="app-shell">
-    <header class="app-header">
-      <div>
-        <p class="eyebrow">MONITORING LALU LINTAS</p>
-        <h1>CCTV Palembang</h1>
-      </div>
-      <div class="header-badge">LIVE</div>
+<body class="auth-page">
+  <div class="auth-shell">
+    <header class="auth-header">
+      <p class="eyebrow">MONITORING LALU LINTAS</p>
+      <h1>CCTV Palembang</h1>
+      <p class="auth-tagline">Masuk untuk memantau kondisi lalu lintas kota dalam satu halaman yang ringan dan nyaman.</p>
     </header>
 
-    <main>
-      <section class="hero-card">
-        <div class="hero-copy">
-          <span class="dot"></span>
-          <span id="globalStatus">Memuat kamera...</span>
-        </div>
-        <p>Pantau kondisi lalu lintas kota dalam satu halaman yang ringan dan nyaman.</p>
-      </section>
+    <section class="auth-card" aria-label="Formulir masuk atau daftar akun">
+      <div class="auth-tabs" role="tablist" aria-label="Mode masuk">
+        <button id="tabLogin" class="auth-tab active" type="button" role="tab" aria-selected="true">Masuk</button>
+        <button id="tabSignup" class="auth-tab" type="button" role="tab" aria-selected="false">Daftar Akun</button>
+      </div>
 
-      <section class="toolbar">
-        <input id="searchInput" type="search" placeholder="Cari CCTV atau lokasi..." autocomplete="off" />
-        <button id="reloadAllBtn" class="icon-button" title="Muat ulang semua">↻</button>
-      </section>
+      <form id="authForm" novalidate>
+        <p id="authError" class="auth-error" role="alert" hidden></p>
 
-      <section class="section-heading">
-        <div>
-          <p class="eyebrow">KAMERA</p>
-          <h2 id="cameraSectionTitle">Daftar CCTV</h2>
-        </div>
-        <div class="heading-controls">
-          <span id="cameraCount" class="count-pill">150 kamera</span>
-          <label class="page-size" for="pageSizeSelect">
-            <span class="page-size-text">Tampilkan</span>
-            <span class="select-wrap">
-              <select id="pageSizeSelect" aria-label="Jumlah kamera per halaman">
-                <option value="12" selected>12</option>
-                <option value="24">24</option>
-                <option value="48">48</option>
-              </select>
-            </span>
-          </label>
-        </div>
-      </section>
+        <label class="field" for="authEmail">
+          <span>Email aktif</span>
+          <input id="authEmail" name="email" type="email" inputmode="email" autocomplete="email" placeholder="nama@contoh.com" required />
+        </label>
 
-      <section id="cameraGrid" class="camera-grid" aria-live="polite"></section>
+        <label class="field" for="authPassword">
+          <span>Kata sandi</span>
+          <span class="password-wrap">
+            <input id="authPassword" name="password" type="password" autocomplete="current-password" placeholder="Minimal 8 karakter" required />
+            <button id="togglePassword" class="password-toggle" type="button" aria-label="Tampilkan kata sandi" title="Tampilkan / sembunyikan">◉</button>
+          </span>
+        </label>
 
-      <nav class="pager" id="pager" aria-label="Navigasi halaman">
-        <p class="pager-label">
-          <span id="pagerInfo" aria-live="polite">Menampilkan 1–12 dari 150</span>
-          <span id="pagerInfoShort" aria-live="polite">1–12 dari 150</span>
+        <label class="field" id="confirmField" for="authConfirm" hidden>
+          <span>Ulangi kata sandi</span>
+          <input id="authConfirm" name="confirm" type="password" autocomplete="new-password" placeholder="Ketik ulang kata sandi" />
+        </label>
+
+        <button id="authSubmit" class="auth-submit" type="submit">Masuk</button>
+
+        <p class="auth-note" id="authModeNote">
+          Mode demo: akun baru langsung aktif di perangkat ini. Pada rilis dengan Supabase, aktivasi dilakukan lewat tautan verifikasi email.
         </p>
-        <div class="pager-controls">
-          <button id="prevPageBtn" class="page-btn page-prev" type="button" aria-label="Halaman sebelumnya">‹<span class="page-btn-text"> Sebelumnya</span></button>
-          <div class="page-numbers" id="pageNumbers"></div>
-          <span class="pager-indicator" id="pagerIndicator" aria-live="polite">1 / 13</span>
-          <button id="nextPageBtn" class="page-btn page-next" type="button" aria-label="Halaman berikutnya"><span class="page-btn-text">Berikutnya </span>›</button>
-        </div>
-      </nav>
-    </main>
+      </form>
 
-    <nav class="bottom-nav" aria-label="Navigasi utama">
-      <button id="navCctv" class="nav-item active">▣<span>CCTV</span></button>
-      <button class="nav-item" disabled>⌖<span>Peta</span></button>
-      <button id="navFavorites" class="nav-item">★<span>Favorit</span></button>
-    </nav>
+      <p class="auth-switch">
+        <span id="switchText">Belum punya akun?</span>
+        <button id="switchMode" class="auth-link" type="button">Daftar akun baru</button>
+      </p>
+    </section>
+
+    <p class="auth-footer">Prototipe pemantauan HLS CCTV non-resmi. Data stream: palembang.go.id.</p>
   </div>
 
-  <template id="cameraCardTemplate">
-    <article class="camera-card">
-      <div class="video-wrap">
-        <video playsinline muted controls preload="metadata"></video>
-        <div class="video-overlay">
-          <span class="status-badge waiting">MENUNGGU</span>
-        </div>
-        <p class="error-text" hidden></p>
-      </div>
-      <div class="camera-bar">
-        <h3 class="camera-name"></h3>
-        <div class="camera-actions">
-          <button class="action-btn reload-btn" type="button" title="Muat ulang" aria-label="Muat ulang stream">↻</button>
-          <button class="favorite-btn" type="button" title="Favorit" aria-label="Tambah ke favorit">☆</button>
-        </div>
-      </div>
-    </article>
-  </template>
-
-  <script src="app.js"></script>
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="session-guard.js"></script>
+  <script src="auth-page.js"></script>
 </body>
 </html>

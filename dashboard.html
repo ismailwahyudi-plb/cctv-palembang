@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>CCTV Lalu Lintas Palembang</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@1"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="header-title">
+        <p class="eyebrow">MONITORING LALU LINTAS</p>
+        <h1>CCTV Palembang</h1>
+        <p class="header-user" id="headerUser"></p>
+      </div>
+      <div class="header-actions">
+        <span class="header-badge">LIVE</span>
+        <button id="logoutBtn" class="logout-btn" type="button" title="Keluar dari akun" aria-label="Keluar dari akun">Keluar</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero-card">
+        <div class="hero-copy">
+          <span class="dot"></span>
+          <span id="globalStatus">Memuat kamera...</span>
+        </div>
+        <p>Pantau kondisi lalu lintas kota dalam satu halaman yang ringan dan nyaman.</p>
+      </section>
+
+      <section class="toolbar">
+        <input id="searchInput" type="search" placeholder="Cari CCTV atau lokasi..." autocomplete="off" />
+        <button id="reloadAllBtn" class="icon-button" title="Muat ulang semua">↻</button>
+      </section>
+
+      <section class="section-heading">
+        <div>
+          <p class="eyebrow">KAMERA</p>
+          <h2 id="cameraSectionTitle">Daftar CCTV</h2>
+        </div>
+        <div class="heading-controls">
+          <span id="cameraCount" class="count-pill">150 kamera</span>
+          <label class="page-size" for="pageSizeSelect">
+            <span class="page-size-text">Tampilkan</span>
+            <span class="select-wrap">
+              <select id="pageSizeSelect" aria-label="Jumlah kamera per halaman">
+                <option value="12" selected>12</option>
+                <option value="24">24</option>
+                <option value="48">48</option>
+              </select>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      <section id="cameraGrid" class="camera-grid" aria-live="polite"></section>
+
+      <nav class="pager" id="pager" aria-label="Navigasi halaman">
+        <p class="pager-label">
+          <span id="pagerInfo" aria-live="polite">Menampilkan 1–12 dari 150</span>
+          <span id="pagerInfoShort" aria-live="polite">1–12 dari 150</span>
+        </p>
+        <div class="pager-controls">
+          <button id="prevPageBtn" class="page-btn page-prev" type="button" aria-label="Halaman sebelumnya">‹<span class="page-btn-text"> Sebelumnya</span></button>
+          <div class="page-numbers" id="pageNumbers"></div>
+          <span class="pager-indicator" id="pagerIndicator" aria-live="polite">1 / 13</span>
+          <button id="nextPageBtn" class="page-btn page-next" type="button" aria-label="Halaman berikutnya"><span class="page-btn-text">Berikutnya </span>›</button>
+        </div>
+      </nav>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigasi utama">
+      <button id="navCctv" class="nav-item active">▣<span>CCTV</span></button>
+      <button class="nav-item" disabled>⌖<span>Peta</span></button>
+      <button id="navFavorites" class="nav-item">★<span>Favorit</span></button>
+    </nav>
+  </div>
+
+  <template id="cameraCardTemplate">
+    <article class="camera-card">
+      <div class="video-wrap">
+        <video playsinline muted controls preload="metadata"></video>
+        <div class="video-overlay">
+          <span class="status-badge waiting">MENUNGGU</span>
+        </div>
+        <p class="error-text" hidden></p>
+      </div>
+      <div class="camera-bar">
+        <h3 class="camera-name"></h3>
+        <div class="camera-actions">
+          <button class="action-btn reload-btn" type="button" title="Muat ulang" aria-label="Muat ulang stream">↻</button>
+          <button class="favorite-btn" type="button" title="Favorit" aria-label="Tambah ke favorit">☆</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="config.js"></script>
+  <script src="auth.js"></script>
+  <script src="session-guard.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
